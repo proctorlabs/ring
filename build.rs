@@ -93,7 +93,7 @@ const RING_SRCS: &[(&[&str], &str)] = &[
     (&[AARCH64], "crypto/fipsmodule/modes/asm/ghash-neon-armv8.pl"),
     (&[AARCH64], SHA512_ARMV8),
 
-    (&[MIPS, MIPS64], "crypto/fipsmodule/bn/asm/mips-mont.pl"),
+    // (&[MIPS, MIPS64], "crypto/fipsmodule/bn/asm/mips-mont.pl"),
     (&[MIPS, MIPS64], "crypto/chacha/chacha_enc.c"),
 
     (&[MIPS64], "crypto/poly1305/asm/poly1305-mips.pl"),
