@@ -33,6 +33,8 @@ const X86: &str = "x86";
 const X86_64: &str = "x86_64";
 const AARCH64: &str = "aarch64";
 const ARM: &str = "arm";
+const MIPS: &str = "mips";
+const MIPS64: &str = "mips64";
 
 #[rustfmt::skip]
 const RING_SRCS: &[(&[&str], &str)] = &[
@@ -42,14 +44,13 @@ const RING_SRCS: &[(&[&str], &str)] = &[
     (&[], "crypto/limbs/limbs.c"),
     (&[], "crypto/mem.c"),
     (&[], "crypto/poly1305/poly1305.c"),
-    (&[], "crypto/curve25519/curve25519.c"),
-    (&[], "crypto/fipsmodule/ec/ecp_nistz.c"),
-    (&[], "crypto/fipsmodule/ec/gfp_p256.c"),
 
-    (&[AARCH64, ARM, X86_64, X86], "crypto/crypto.c"),
-    (&[AARCH64, ARM, X86_64, X86], "crypto/fipsmodule/ec/ecp_nistz256.c"),
-    // (&[AARCH64, ARM, X86_64, X86], "crypto/fipsmodule/ec/gfp_p256.c"),
-    (&[AARCH64, ARM, X86_64, X86], "crypto/fipsmodule/ec/gfp_p384.c"),
+    (&[AARCH64, ARM, MIPS, MIPS64, X86_64, X86], "crypto/crypto.c"),
+    (&[AARCH64, ARM, MIPS, MIPS64, X86_64, X86], "crypto/curve25519/curve25519.c"),
+    (&[AARCH64, ARM, MIPS, MIPS64, X86_64, X86], "crypto/fipsmodule/ec/ecp_nistz.c"),
+    (&[AARCH64, ARM, MIPS, MIPS64, X86_64, X86], "crypto/fipsmodule/ec/gfp_p256.c"),
+    (&[AARCH64, ARM, MIPS, MIPS64, X86_64, X86], "crypto/fipsmodule/ec/gfp_p384.c"),
+    (&[AARCH64, ARM, MIPS, MIPS64, X86_64, X86], "crypto/fipsmodule/ec/p256.c"),
 
     (&[X86_64, X86], "crypto/cpu-intel.c"),
 
@@ -57,14 +58,14 @@ const RING_SRCS: &[(&[&str], &str)] = &[
     (&[X86], "crypto/fipsmodule/aes/asm/vpaes-x86.pl"),
     (&[X86], "crypto/fipsmodule/bn/asm/x86-mont.pl"),
     (&[X86], "crypto/chacha/asm/chacha-x86.pl"),
-    (&[X86], "crypto/fipsmodule/ec/asm/ecp_nistz256-x86.pl"),
     (&[X86], "crypto/fipsmodule/modes/asm/ghash-x86.pl"),
 
+    (&[X86_64], "crypto/chacha/asm/chacha-x86_64.pl"),
     (&[X86_64], "crypto/fipsmodule/aes/asm/aesni-x86_64.pl"),
     (&[X86_64], "crypto/fipsmodule/aes/asm/vpaes-x86_64.pl"),
     (&[X86_64], "crypto/fipsmodule/bn/asm/x86_64-mont.pl"),
     (&[X86_64], "crypto/fipsmodule/bn/asm/x86_64-mont5.pl"),
-    (&[X86_64], "crypto/chacha/asm/chacha-x86_64.pl"),
+    (&[X86_64], "crypto/fipsmodule/ec/p256-x86_64.c"),
     (&[X86_64], "crypto/fipsmodule/ec/asm/p256-x86_64-asm.pl"),
     (&[X86_64], "crypto/fipsmodule/modes/asm/aesni-gcm-x86_64.pl"),
     (&[X86_64], "crypto/fipsmodule/modes/asm/ghash-x86_64.pl"),
@@ -80,7 +81,6 @@ const RING_SRCS: &[(&[&str], &str)] = &[
     (&[ARM], "crypto/fipsmodule/bn/asm/armv4-mont.pl"),
     (&[ARM], "crypto/chacha/asm/chacha-armv4.pl"),
     (&[ARM], "crypto/curve25519/asm/x25519-asm-arm.S"),
-    (&[ARM], "crypto/fipsmodule/ec/asm/ecp_nistz256-armv4.pl"),
     (&[ARM], "crypto/fipsmodule/modes/asm/ghash-armv4.pl"),
     (&[ARM], "crypto/poly1305/poly1305_arm.c"),
     (&[ARM], "crypto/poly1305/poly1305_arm_asm.S"),
@@ -90,9 +90,13 @@ const RING_SRCS: &[(&[&str], &str)] = &[
     (&[AARCH64], "crypto/fipsmodule/aes/asm/vpaes-armv8.pl"),
     (&[AARCH64], "crypto/fipsmodule/bn/asm/armv8-mont.pl"),
     (&[AARCH64], "crypto/chacha/asm/chacha-armv8.pl"),
-    (&[AARCH64], "crypto/fipsmodule/ec/asm/ecp_nistz256-armv8.pl"),
     (&[AARCH64], "crypto/fipsmodule/modes/asm/ghash-neon-armv8.pl"),
     (&[AARCH64], SHA512_ARMV8),
+
+    (&[MIPS, MIPS64], "crypto/fipsmodule/bn/asm/mips-mont.pl"),
+    (&[MIPS, MIPS64], "crypto/chacha/chacha_enc.c"),
+
+    (&[MIPS64], "crypto/poly1305/asm/poly1305-mips.pl"),
 ];
 
 const SHA256_X86_64: &str = "crypto/fipsmodule/sha/asm/sha256-x86_64.pl";
@@ -109,11 +113,14 @@ const RING_INCLUDES: &[&str] =
       "crypto/curve25519/curve25519_tables.h",
       "crypto/curve25519/internal.h",
       "crypto/fipsmodule/bn/internal.h",
-      "crypto/fipsmodule/ec/ecp_nistz256_table.inl",
       "crypto/fipsmodule/ec/ecp_nistz384.inl",
       "crypto/fipsmodule/ec/ecp_nistz.h",
       "crypto/fipsmodule/ec/ecp_nistz384.h",
-      "crypto/fipsmodule/ec/ecp_nistz256.h",
+      "crypto/fipsmodule/ec/util.h",
+      "crypto/fipsmodule/ec/p256_shared.h",
+      "crypto/fipsmodule/ec/p256_table.h",
+      "crypto/fipsmodule/ec/p256-x86_64.h",
+      "crypto/fipsmodule/ec/p256-x86_64-table.h",
       "crypto/internal.h",
       "crypto/limbs/limbs.h",
       "crypto/limbs/limbs.inl",
@@ -125,9 +132,12 @@ const RING_INCLUDES: &[&str] =
       "include/GFp/cpu.h",
       "include/GFp/mem.h",
       "include/GFp/poly1305.h",
+      "include/GFp/mips_arch.h",
       "include/GFp/type_check.h",
       "third_party/fiat/curve25519_32.h",
       "third_party/fiat/curve25519_64.h",
+      "third_party/fiat/p256_32.h",
+      "third_party/fiat/p256_64.h",
     ];
 
 #[rustfmt::skip]
@@ -214,23 +224,120 @@ const LD_FLAGS: &[&str] = &[];
 
 // None means "any OS" or "any target". The first match in sequence order is
 // taken.
-const ASM_TARGETS: &[(&str, Option<&str>, Option<&str>)] = &[
-    ("x86_64", Some("ios"), Some("macosx")),
-    ("x86_64", Some("macos"), Some("macosx")),
-    ("x86_64", Some(WINDOWS), Some("nasm")),
-    ("x86_64", None, Some("elf")),
-    ("aarch64", Some("ios"), Some("ios64")),
-    ("aarch64", Some("macos"), Some("ios64")),
-    ("aarch64", None, Some("linux64")),
-    ("x86", Some(WINDOWS), Some("win32n")),
-    ("x86", Some("ios"), Some("macosx")),
-    ("x86", None, Some("elf")),
-    ("arm", Some("ios"), Some("ios32")),
-    ("arm", None, Some("linux32")),
-    ("wasm32", None, None),
+const ASM_TARGETS: &[AsmTarget] = &[
+    AsmTarget {
+        oss: LINUX_ABI,
+        arch: "aarch64",
+        perlasm_format: "linux64",
+        asm_extension: "S",
+        preassemble: false,
+    },
+    AsmTarget {
+        oss: LINUX_ABI,
+        arch: "arm",
+        perlasm_format: "linux32",
+        asm_extension: "S",
+        preassemble: false,
+    },
+    AsmTarget {
+        oss: LINUX_ABI,
+        arch: "x86",
+        perlasm_format: "elf",
+        asm_extension: "S",
+        preassemble: false,
+    },
+    AsmTarget {
+        oss: LINUX_ABI,
+        arch: "x86_64",
+        perlasm_format: "elf",
+        asm_extension: "S",
+        preassemble: false,
+    },
+    AsmTarget {
+        oss: LINUX_ABI,
+        arch: "mips",
+        perlasm_format: "elf",
+        asm_extension: "S",
+        preassemble: false,
+    },
+    AsmTarget {
+        oss: LINUX_ABI,
+        arch: "mips64",
+        perlasm_format: "elf",
+        asm_extension: "S",
+        preassemble: false,
+    },
+    AsmTarget {
+        oss: MACOS_ABI,
+        arch: "aarch64",
+        perlasm_format: "ios64",
+        asm_extension: "S",
+        preassemble: false,
+    },
+    AsmTarget {
+        oss: MACOS_ABI,
+        arch: "x86_64",
+        perlasm_format: "macosx",
+        asm_extension: "S",
+        preassemble: false,
+    },
+    AsmTarget {
+        oss: &[WINDOWS],
+        arch: "x86",
+        perlasm_format: "win32n",
+        asm_extension: "asm",
+        preassemble: true,
+    },
+    AsmTarget {
+        oss: &[WINDOWS],
+        arch: "x86_64",
+        perlasm_format: "nasm",
+        asm_extension: "asm",
+        preassemble: true,
+    },
 ];
 
+struct AsmTarget {
+    /// Operating systems.
+    oss: &'static [&'static str],
+
+    /// Architectures.
+    arch: &'static str,
+
+    /// The PerlAsm format name.
+    perlasm_format: &'static str,
+
+    /// The filename extension for assembly files.
+    asm_extension: &'static str,
+
+    /// Whether pre-assembled object files should be included in the Cargo
+    /// package instead of the asm sources. This way, the user doesn't need
+    /// to install an assembler for the target. This is particularly important
+    /// for x86/x86_64 Windows since an assembler doesn't come with the C
+    /// compiler.
+    preassemble: bool,
+}
+
+/// Operating systems that have the same ABI as Linux on every architecture
+/// mentioned in `ASM_TARGETS`.
+const LINUX_ABI: &[&str] = &[
+    "android",
+    "dragonfly",
+    "freebsd",
+    "fuchsia",
+    "illumos",
+    "netbsd",
+    "openbsd",
+    "linux",
+    "solaris",
+];
+
+/// Operating systems that have the same ABI as macOS on every architecture
+/// mentioned in `ASM_TARGETS`.
+const MACOS_ABI: &[&str] = &["ios", "macos"];
+
 const WINDOWS: &str = "windows";
+
 const MSVC: &str = "msvc";
 const MSVC_OBJ_OPT: &str = "/Fo";
 const MSVC_OBJ_EXT: &str = "obj";
@@ -255,6 +362,7 @@ fn ring_build_rs_main() {
     let arch = env::var("CARGO_CFG_TARGET_ARCH").unwrap();
     let os = env::var("CARGO_CFG_TARGET_OS").unwrap();
     let env = env::var("CARGO_CFG_TARGET_ENV").unwrap();
+    let endian = env::var("CARGO_CFG_TARGET_ENDIAN").unwrap();
     let (obj_ext, obj_opt) = if env == MSVC {
         (MSVC_OBJ_EXT, MSVC_OBJ_OPT)
     } else {
@@ -268,6 +376,7 @@ fn ring_build_rs_main() {
 
     let target = Target {
         arch,
+        endian,
         os,
         env,
         obj_ext,
@@ -287,27 +396,24 @@ fn pregenerate_asm_main() {
     let pregenerated_tmp = pregenerated.join("tmp");
     std::fs::create_dir(&pregenerated_tmp).unwrap();
 
-    for &(target_arch, target_os, perlasm_format) in ASM_TARGETS {
+    for asm_target in ASM_TARGETS {
         // For Windows, package pregenerated object files instead of
         // pregenerated assembly language source files, so that the user
         // doesn't need to install the assembler.
-        let asm_dir = if target_os == Some(WINDOWS) {
+        let asm_dir = if asm_target.preassemble {
             &pregenerated_tmp
         } else {
             &pregenerated
         };
 
-        if let Some(perlasm_format) = perlasm_format {
-            let perlasm_src_dsts =
-                perlasm_src_dsts(&asm_dir, target_arch, target_os, perlasm_format);
-            perlasm(&perlasm_src_dsts, target_arch, perlasm_format, None);
+        let perlasm_src_dsts = perlasm_src_dsts(&asm_dir, asm_target);
+        perlasm(&perlasm_src_dsts, asm_target, None);
 
-            if target_os == Some(WINDOWS) {
-                let srcs = asm_srcs(perlasm_src_dsts);
-                for src in srcs {
-                    let obj_path = obj_path(&pregenerated, &src, MSVC_OBJ_EXT);
-                    run_command(nasm(&src, target_arch, &obj_path));
-                }
+        if asm_target.preassemble {
+            let srcs = asm_srcs(perlasm_src_dsts);
+            for src in srcs {
+                let obj_path = obj_path(&pregenerated, &src, MSVC_OBJ_EXT);
+                run_command(nasm(&src, asm_target.arch, &obj_path));
             }
         }
     }
@@ -315,6 +421,7 @@ fn pregenerate_asm_main() {
 
 struct Target {
     arch: String,
+    endian: String,
     os: String,
     env: String,
     obj_ext: &'static str,
@@ -331,6 +438,10 @@ fn build_c_code(target: &Target, pregenerated: PathBuf, out_dir: &Path) {
         }
     }
 
+    if target.arch == "mips" && target.endian == "big" {
+        panic!("MIPS Big-Endian detected. Stoping compilation as BoringSSL code are not available for this platform");
+    }
+
     let includes_modified = RING_INCLUDES
         .iter()
         .chain(RING_BUILD_FILE.iter())
@@ -339,24 +450,9 @@ fn build_c_code(target: &Target, pregenerated: PathBuf, out_dir: &Path) {
         .max()
         .unwrap();
 
-    fn is_none_or_equals<T>(opt: Option<T>, other: T) -> bool
-    where
-        T: PartialEq,
-    {
-        if let Some(value) = opt {
-            value == other
-        } else {
-            true
-        }
-    }
-
-    let (_, _, perlasm_format) = ASM_TARGETS
-        .iter()
-        .find(|entry| {
-            let &(entry_arch, entry_os, _) = *entry;
-            entry_arch == target.arch && is_none_or_equals(entry_os, &target.os)
-        })
-        .unwrap();
+    let asm_target = ASM_TARGETS.iter().find(|asm_target| {
+        asm_target.arch == target.arch && asm_target.oss.contains(&target.os.as_ref())
+    });
 
     let use_pregenerated = !target.is_git;
     let warnings_are_errors = target.is_git;
@@ -367,17 +463,11 @@ fn build_c_code(target: &Target, pregenerated: PathBuf, out_dir: &Path) {
         out_dir
     };
 
-    let asm_srcs = if let Some(perlasm_format) = perlasm_format {
-        let perlasm_src_dsts =
-            perlasm_src_dsts(asm_dir, &target.arch, Some(&target.os), perlasm_format);
+    let asm_srcs = if let Some(asm_target) = asm_target {
+        let perlasm_src_dsts = perlasm_src_dsts(asm_dir, asm_target);
 
         if !use_pregenerated {
-            perlasm(
-                &perlasm_src_dsts[..],
-                &target.arch,
-                perlasm_format,
-                Some(includes_modified),
-            );
+            perlasm(&perlasm_src_dsts[..], asm_target, Some(includes_modified));
         }
 
         let mut asm_srcs = asm_srcs(perlasm_src_dsts);
@@ -666,17 +756,12 @@ fn sources_for_arch(arch: &str) -> Vec<PathBuf> {
         .collect::<Vec<_>>()
 }
 
-fn perlasm_src_dsts(
-    out_dir: &Path,
-    arch: &str,
-    os: Option<&str>,
-    perlasm_format: &str,
-) -> Vec<(PathBuf, PathBuf)> {
-    let srcs = sources_for_arch(arch);
+fn perlasm_src_dsts(out_dir: &Path, asm_target: &AsmTarget) -> Vec<(PathBuf, PathBuf)> {
+    let srcs = sources_for_arch(asm_target.arch);
     let mut src_dsts = srcs
         .iter()
         .filter(|p| is_perlasm(p))
-        .map(|src| (src.clone(), asm_path(out_dir, src, os, perlasm_format)))
+        .map(|src| (src.clone(), asm_path(out_dir, src, asm_target)))
         .collect::<Vec<_>>();
 
     // Some PerlAsm source files need to be run multiple times with different
@@ -689,7 +774,7 @@ fn perlasm_src_dsts(
                 let synthesized_path = PathBuf::from(synthesized);
                 src_dsts.push((
                     concrete_path,
-                    asm_path(out_dir, &synthesized_path, os, perlasm_format),
+                    asm_path(out_dir, &synthesized_path, asm_target),
                 ))
             }
         };
@@ -711,19 +796,20 @@ fn is_perlasm(path: &PathBuf) -> bool {
     path.extension().unwrap().to_str().unwrap() == "pl"
 }
 
-fn asm_path(out_dir: &Path, src: &Path, os: Option<&str>, perlasm_format: &str) -> PathBuf {
+fn asm_path(out_dir: &Path, src: &Path, asm_target: &AsmTarget) -> PathBuf {
     let src_stem = src.file_stem().expect("source file without basename");
 
     let dst_stem = src_stem.to_str().unwrap();
-    let dst_extension = if os == Some("windows") { "asm" } else { "S" };
-    let dst_filename = format!("{}-{}.{}", dst_stem, perlasm_format, dst_extension);
+    let dst_filename = format!(
+        "{}-{}.{}",
+        dst_stem, asm_target.perlasm_format, asm_target.asm_extension
+    );
     out_dir.join(dst_filename)
 }
 
 fn perlasm(
     src_dst: &[(PathBuf, PathBuf)],
-    arch: &str,
-    perlasm_format: &str,
+    asm_target: &AsmTarget,
     includes_modified: Option<SystemTime>,
 ) {
     for (src, dst) in src_dst {
@@ -735,8 +821,8 @@ fn perlasm(
 
         let mut args = Vec::<String>::new();
         args.push(src.to_string_lossy().into_owned());
-        args.push(perlasm_format.to_owned());
-        if arch == "x86" {
+        args.push(asm_target.perlasm_format.to_owned());
+        if asm_target.arch == "x86" {
             args.push("-fPIC".into());
             args.push("-DOPENSSL_IA32_SSE2".into());
         }

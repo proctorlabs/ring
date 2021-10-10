@@ -211,11 +211,17 @@ mod sysrand_chunk {
         #[cfg(target_arch = "arm")]
         const SYS_GETRANDOM: c_long = 384;
 
+        #[cfg(target_arch = "mips64")]
+        const SYS_GETRANDOM: c_long = 5313;
+
         #[cfg(target_arch = "x86")]
         const SYS_GETRANDOM: c_long = 355;
 
         #[cfg(target_arch = "x86_64")]
         const SYS_GETRANDOM: c_long = 318;
+
+        #[cfg(all(target_arch = "mips", target_pointer_width = "32"))]
+        const SYS_GETRANDOM: c_long = 4353;
 
         let chunk_len: c::size_t = dest.len();
         let r = unsafe { libc::syscall(SYS_GETRANDOM, dest.as_mut_ptr(), chunk_len, 0) };
